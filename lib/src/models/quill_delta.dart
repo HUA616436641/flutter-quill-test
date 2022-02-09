@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:diff_match_patch/diff_match_patch.dart' as dmp;
 import 'package:quiver/core.dart';
+import '../models/documents/nodes/embed.dart';
 
 const _attributeEquality = DeepCollectionEquality();
 const _valueEquality = DeepCollectionEquality();
@@ -104,6 +105,39 @@ class Operation {
     if (_attributes != null) json[Operation.attributesKey] = attributes;
     return json;
   }
+
+  // 修改
+  Map<String, dynamic> toFormalJson() {
+    final json = {key: value};
+    if (_attributes != null) json[Operation.attributesKey] = attributes;
+    if (key == Operation.insertKey) {
+      // Embeddable.
+      if (value is Map) {
+        json[key] = Embeddable.fromJson(value).toFormalJson();
+      } else {
+        // Check if data is mention embed.
+        if (attributes != null && attributes!.containsKey('at')) {
+          final mentionId =
+          attributes!['at'] is String ? attributes!['at'] as String : '';
+          final mentionValue = value is String ? value as String : '';
+          final embed =
+          MentionEmbed.fromAttribute(mentionId, '@', mentionValue);
+          json[key] = embed.toFormalJson();
+        }
+        if (attributes != null && attributes!.containsKey('channel')) {
+          final mentionId = attributes!['channel'] is String
+              ? attributes!['channel'] as String
+              : '';
+          final mentionValue = value is String ? value as String : '';
+          final embed =
+          MentionEmbed.fromAttribute(mentionId, '#', mentionValue);
+          json[key] = embed.toFormalJson();
+        }
+      }
+    }
+    return json;
+  }
+
 
   /// Returns value of this operation.
   ///
@@ -289,6 +323,10 @@ class Delta {
 
   /// Returns list of operations in this delta.
   List<Operation> toList() => List.from(_operations);
+
+  // 修改
+  List toFormalJson() =>
+      toList().map((operation) => operation.toFormalJson()).toList();
 
   /// Returns JSON-serializable version of this delta.
   List toJson() => toList().map((operation) => operation.toJson()).toList();
