@@ -719,6 +719,26 @@ class RawEditorState extends EditorState
 
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
+
+  @override
+  void copySelection(SelectionChangedCause cause) {
+
+  }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) {
+
+  }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    return ;
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) {
+
+  }
 }
 
 class _Editor extends MultiChildRenderObjectWidget {
