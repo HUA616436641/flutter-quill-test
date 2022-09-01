@@ -134,15 +134,10 @@ class ImageEmbed extends Embeddable {
     } else if (data['height'] is num) {
       height = data['height'];
     }
-    String? nameData;
-    if (data.containsKey('name')) nameData = data['name'];
-    String? checkPath;
-    if (data.containsKey('checkPath')) checkPath = data['checkPath'];
-
     return ImageEmbed(
-      name: nameData,
-      source: data['source'],
-      checkPath: checkPath,
+      name: data['name'] as String?,
+      source: data['source'] as String,
+      checkPath: data['checkPath'] as String?,
       width: width,
       height: height,
     );
