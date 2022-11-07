@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import '../../quill_delta.dart';
 import '../style.dart';
-import 'embed.dart';
+import 'embeddable.dart';
 import 'line.dart';
 import 'node.dart';
 
@@ -99,6 +99,13 @@ abstract class Leaf extends Node {
     if (prev != null) {
       prev.adjust();
     }
+  }
+
+  @override
+  String toString() {
+    final keys = style.keys.toList(growable: false)..sort();
+    final styleKeys = keys.join();
+    return '⟨$value⟩$styleKeys';
   }
 
   /// Adjust this text node by merging it with adjacent nodes if they share
@@ -241,7 +248,9 @@ class Text extends Leaf {
 class Embed extends Leaf {
   Embed(Embeddable data) : super.val(data);
 
+  // Refer to https://www.fileformat.info/info/unicode/char/fffc/index.htm
   static const kObjectReplacementCharacter = '\uFFFC';
+  static const kObjectReplacementInt = 65532;
 
   @override
   Node newInstance() => throw UnimplementedError();
@@ -249,7 +258,7 @@ class Embed extends Leaf {
   @override
   Embeddable get value => super.value as Embeddable;
 
-  /// // Embed nodes are represented as unicode object replacement character in
+  // Embed nodes are represented as unicode object replacement character in
   // plain text.
   @override
   String toPlainText() => kObjectReplacementCharacter;
@@ -262,4 +271,6 @@ class Embed extends Leaf {
     }
     return kObjectReplacementCharacter;
   }
+  @override
+  String toString() => '${super.toString()} ${value.type}';
 }

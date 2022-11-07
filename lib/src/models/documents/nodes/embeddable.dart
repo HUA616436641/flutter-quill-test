@@ -24,8 +24,7 @@ class Embeddable {
   }
 
   Map<String, dynamic> toFormalJson() {
-    final m = <String, dynamic>{type: data};
-    return m;
+    return {type: data};
   }
 
   // 修改
@@ -37,6 +36,8 @@ class Embeddable {
   // }
   static Embeddable fromJson(Map<String, dynamic> json) {
     final m = Map<String, dynamic>.from(json);
+    // assert(m.length == 1, 'Embeddable map must only have one key');
+    // return Embeddable(m.keys.first, m.values.first);
     assert(m.length > 0, 'Embeddable can not be empty');
     if (m.length > 1 && m.containsKey('_type')) {
       final type = m['_type'];
@@ -60,17 +61,11 @@ class Embeddable {
   }
 }
 
-/// An object which occupies an entire line in a document and cannot co-exist
-/// inline with regular text.
-///
 /// There are two built-in embed types supported by Quill documents, however
 /// the document model itself does not make any assumptions about the types
 /// of embedded objects and allows users to define their own types.
 class BlockEmbed extends Embeddable {
   const BlockEmbed(String type, String data) : super(type, data);
-
-  static const String horizontalRuleType = 'divider';
-  static BlockEmbed horizontalRule = const BlockEmbed(horizontalRuleType, 'hr');
 
   static const String imageType = 'image';
   static BlockEmbed image(String imageUrl) => BlockEmbed(imageType, imageUrl);
