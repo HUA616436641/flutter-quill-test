@@ -46,6 +46,7 @@ class RawEditor extends StatefulWidget {
       required this.cursorStyle,
       required this.selectionColor,
       required this.selectionCtrls,
+      this.isSelectionInViewport,
       Key? key,
       this.scrollable = true,
       this.padding = EdgeInsets.zero,
@@ -225,6 +226,7 @@ class RawEditor extends StatefulWidget {
   final LinkActionPickerDelegate linkActionPickerDelegate;
   final CustomStyleBuilder? customStyleBuilder;
   final bool floatingCursorDisabled;
+  final IsSelectionInViewport? isSelectionInViewport;
 
   @override
   State<StatefulWidget> createState() => RawEditorState();
@@ -309,6 +311,7 @@ class RawEditorState extends EditorState
           padding: widget.padding,
           maxContentWidth: widget.maxContentWidth,
           floatingCursorDisabled: widget.floatingCursorDisabled,
+          isSelectionInViewport: widget.isSelectionInViewport,
           children: _buildChildren(_doc, context),
         ),
       ),
@@ -348,6 +351,7 @@ class RawEditorState extends EditorState
               maxContentWidth: widget.maxContentWidth,
               cursorController: _cursorCont,
               floatingCursorDisabled: widget.floatingCursorDisabled,
+              isSelectionInViewport: widget.isSelectionInViewport,
               children: _buildChildren(_doc, context),
             ),
           ),
@@ -1189,6 +1193,7 @@ class _Editor extends MultiChildRenderObjectWidget {
     required this.scrollBottomInset,
     required this.cursorController,
     required this.floatingCursorDisabled,
+    this.isSelectionInViewport,
     this.padding = EdgeInsets.zero,
     this.maxContentWidth,
     this.offset,
@@ -1209,10 +1214,12 @@ class _Editor extends MultiChildRenderObjectWidget {
   final double? maxContentWidth;
   final CursorCont cursorController;
   final bool floatingCursorDisabled;
+  final IsSelectionInViewport? isSelectionInViewport;
 
   @override
   RenderEditor createRenderObject(BuildContext context) {
     return RenderEditor(
+        key: key as GlobalKey,
         offset: offset,
         document: document,
         textDirection: textDirection,
@@ -1227,7 +1234,9 @@ class _Editor extends MultiChildRenderObjectWidget {
         padding: padding,
         maxContentWidth: maxContentWidth,
         scrollBottomInset: scrollBottomInset,
-        floatingCursorDisabled: floatingCursorDisabled);
+        floatingCursorDisabled: floatingCursorDisabled,
+        isSelectionInViewport: isSelectionInViewport,
+    );
   }
 
   @override

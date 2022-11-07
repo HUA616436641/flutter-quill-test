@@ -149,6 +149,7 @@ class QuillEditor extends StatefulWidget {
       required this.autoFocus,
       required this.readOnly,
       required this.expands,
+      this.isSelectionInViewport,
       this.showCursor,
       this.paintCursorAboveText,
       this.placeholder,
@@ -180,6 +181,7 @@ class QuillEditor extends StatefulWidget {
     required QuillController controller,
     required bool readOnly,
     Brightness? keyboardAppearance,
+    IsSelectionInViewport? isSelectionInViewport,
   }) {
     return QuillEditor(
       controller: controller,
@@ -191,6 +193,7 @@ class QuillEditor extends StatefulWidget {
       expands: false,
       padding: EdgeInsets.zero,
       keyboardAppearance: keyboardAppearance ?? Brightness.light,
+      isSelectionInViewport: isSelectionInViewport,
     );
   }
 
@@ -363,6 +366,8 @@ class QuillEditor extends StatefulWidget {
 
   final bool floatingCursorDisabled;
 
+  final IsSelectionInViewport? isSelectionInViewport;
+
   /// allows to create a custom textSelectionControls,
   /// if this is null a default textSelectionControls based on the app's theme
   /// will be used
@@ -462,6 +467,7 @@ class QuillEditorState extends State<QuillEditor>
       linkActionPickerDelegate: widget.linkActionPickerDelegate,
       customStyleBuilder: widget.customStyleBuilder,
       floatingCursorDisabled: widget.floatingCursorDisabled,
+      isSelectionInViewport: widget.isSelectionInViewport,
     );
 
     final editor = I18n(
@@ -709,6 +715,8 @@ const EdgeInsets _kFloatingCursorAddedMargin = EdgeInsets.fromLTRB(4, 4, 4, 5);
 const EdgeInsets _kFloatingCaretSizeIncrease =
     EdgeInsets.symmetric(horizontal: 0.5, vertical: 1);
 
+typedef IsSelectionInViewport = List<bool> Function(double selectionStart, double selectionEnd);
+
 /// Displays a document as a vertical list of document segments (lines
 /// and blocks).
 ///
@@ -717,6 +725,7 @@ class RenderEditor extends RenderEditableContainerBox
     with RelayoutWhenSystemFontsChangeMixin
     implements RenderAbstractEditor {
   RenderEditor({
+    required this.key,
     required this.document,
     required TextDirection textDirection,
     required bool hasFocus,
@@ -730,6 +739,7 @@ class RenderEditor extends RenderEditableContainerBox
     required this.onSelectionCompleted,
     required double scrollBottomInset,
     required this.floatingCursorDisabled,
+    this.isSelectionInViewport,
     ViewportOffset? offset,
     List<RenderEditableBox>? children,
     EdgeInsets floatingCursorAddedMargin =
@@ -754,10 +764,12 @@ class RenderEditor extends RenderEditableContainerBox
   final bool scrollable;
 
   Document document;
+  GlobalKey key;
   TextSelection selection;
   bool _hasFocus = false;
   LayerLink _startHandleLayerLink;
   LayerLink _endHandleLayerLink;
+  IsSelectionInViewport? isSelectionInViewport;
 
   /// Called when the selection changes.
   TextSelectionChangedHandler onSelectionChanged;
@@ -772,28 +784,49 @@ class RenderEditor extends RenderEditableContainerBox
   final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
 
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
-    final visibleRegion = Offset.zero & size;
-    final startPosition =
-        TextPosition(offset: selection.start, affinity: selection.affinity);
-    final startOffset = _getOffsetForCaret(startPosition);
-    // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
-    // Check if the selection is visible with an approximation because a
-    // difference between rounded and unrounded values causes the caret to be
-    // reported as having a slightly (< 0.5) negative y offset. This rounding
-    // happens in paragraph.cc's layout and TextPainer's
-    // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
-    // this can be changed to be a strict check instead of an approximation.
-    const visibleRegionSlop = 0.5;
-    _selectionStartInViewport.value = visibleRegion
-        .inflate(visibleRegionSlop)
-        .contains(startOffset + effectiveOffset);
+    // 修改，添加isSelectionInViewport!=null的逻辑
+    if(isSelectionInViewport!=null) {
+      final renderBox = (key.currentContext!.findRenderObject()!) as RenderBox ;
+      final edotirOffset = renderBox.localToGlobal(Offset.zero);
 
-    final endPosition =
-        TextPosition(offset: selection.end, affinity: selection.affinity);
-    final endOffset = _getOffsetForCaret(endPosition);
-    _selectionEndInViewport.value = visibleRegion
-        .inflate(visibleRegionSlop)
-        .contains(endOffset + effectiveOffset);
+      final startPosition =
+      TextPosition(offset: selection.start, affinity: selection.affinity);
+      final startOffset = _getOffsetForCaret(startPosition);
+      final startPositionY = edotirOffset.dy + startOffset.dy;
+
+      final endPosition =
+      TextPosition(offset: selection.end, affinity: selection.affinity);
+      final endOffset = _getOffsetForCaret(endPosition);
+      final endPositionY = edotirOffset.dy + endOffset.dy;
+
+      final List<bool> res = isSelectionInViewport!.call(startPositionY,endPositionY);
+      _selectionStartInViewport.value = res[0];
+      _selectionEndInViewport.value = res[1];
+
+    } else {
+      final visibleRegion = Offset.zero & size;
+      final startPosition =
+      TextPosition(offset: selection.start, affinity: selection.affinity);
+      final startOffset = _getOffsetForCaret(startPosition);
+      // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
+      // Check if the selection is visible with an approximation because a
+      // difference between rounded and unrounded values causes the caret to be
+      // reported as having a slightly (< 0.5) negative y offset. This rounding
+      // happens in paragraph.cc's layout and TextPainer's
+      // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
+      // this can be changed to be a strict check instead of an approximation.
+      const visibleRegionSlop = 0.5;
+      _selectionStartInViewport.value = visibleRegion
+          .inflate(visibleRegionSlop)
+          .contains(startOffset + effectiveOffset);
+
+      final endPosition =
+      TextPosition(offset: selection.end, affinity: selection.affinity);
+      final endOffset = _getOffsetForCaret(endPosition);
+      _selectionEndInViewport.value = visibleRegion
+          .inflate(visibleRegionSlop)
+          .contains(endOffset + effectiveOffset);
+    }
   }
 
   // returns offset relative to this at which the caret will be painted

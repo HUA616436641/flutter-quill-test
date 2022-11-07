@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:diff_match_patch/diff_match_patch.dart' as dmp;
 import 'package:quiver/core.dart';
-import '../models/documents/nodes/embed.dart';
+import '../models/documents/nodes/embeddable.dart';
 
 const _attributeEquality = DeepCollectionEquality();
 const _valueEquality = DeepCollectionEquality();
