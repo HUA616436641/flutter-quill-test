@@ -34,6 +34,12 @@ dependencies:
   flutter_quill:
     path: ../
 
+dependency_overrides:
+  flutter_inappwebview:
+    git:
+      url: https://github.com/FBSocial/flutter_inappwebview
+      ref: 5.4.3+7-fix
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
