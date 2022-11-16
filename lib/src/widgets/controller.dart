@@ -17,14 +17,15 @@ typedef DeleteCallback = void Function(int cursorPosition, bool forward);
 
 class QuillController extends ChangeNotifier {
   QuillController({
-    required this.document,
+    required Document document,
     required TextSelection selection,
     bool keepStyleOnNewLine = false,
     this.onReplaceText,
     this.onDelete,
     this.onSelectionCompleted,
     this.onSelectionChanged,
-  })  : _selection = selection,
+  })  : _document = document,
+        _selection = selection,
         _keepStyleOnNewLine = keepStyleOnNewLine;
 
   factory QuillController.basic() {
@@ -35,7 +36,16 @@ class QuillController extends ChangeNotifier {
   }
 
   /// Document managed by this controller.
-  final Document document;
+  Document _document;
+  Document get document => _document;
+  set document(doc) {
+    _document = doc;
+
+    // Prevent the selection from
+    _selection = const TextSelection(baseOffset: 0, extentOffset: 0);
+
+    notifyListeners();
+  }
 
   /// Tells whether to keep or reset the [toggledStyle]
   /// when user adds a new line.
@@ -62,6 +72,10 @@ class QuillController extends ChangeNotifier {
 
   bool ignoreFocusOnTextChange = false;
 
+  /// Skip requestKeyboard being called in
+  /// RawEditorState#_didChangeTextEditingValue
+  bool skipRequestKeyboard = false;
+
   /// True when this [QuillController] instance has been disposed.
   ///
   /// A safety mechanism to ensure that listeners don't crash when adding,
@@ -86,6 +100,26 @@ class QuillController extends ChangeNotifier {
     return document
         .collectStyle(selection.start, selection.end - selection.start)
         .mergeAll(toggledStyle);
+  }
+
+  // Increases or decreases the indent of the current selection by 1.
+  void indentSelection(bool isIncrease) {
+    final indent = getSelectionStyle().attributes[Attribute.indent.key];
+    if (indent == null) {
+      if (isIncrease) {
+        formatSelection(Attribute.indentL1);
+      }
+      return;
+    }
+    if (indent.value == 1 && !isIncrease) {
+      formatSelection(Attribute.clone(Attribute.indentL1, null));
+      return;
+    }
+    if (isIncrease) {
+      formatSelection(Attribute.getIndentLevel(indent.value + 1));
+      return;
+    }
+    formatSelection(Attribute.getIndentLevel(indent.value - 1));
   }
 
   /// Returns all styles for each node within selection
