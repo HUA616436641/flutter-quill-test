@@ -15,6 +15,7 @@ import '../models/documents/nodes/leaf.dart';
 import '../models/documents/nodes/leaf.dart' as leaf;
 import '../models/documents/nodes/line.dart';
 import '../models/documents/nodes/node.dart';
+import '../models/documents/nodes/embeddable.dart';
 import '../models/documents/style.dart';
 import '../utils/color.dart';
 import '../utils/font.dart';
@@ -277,6 +278,19 @@ class _TextLineState extends State<TextLine> {
 
   TextSpan _getTextSpanFromNode(
       DefaultStyles defaultStyles, Node node, Style lineStyle) {
+    if(node is Embed) {
+      if(node.value is MentionEmbed) {
+        return TextSpan(
+          text: (node.value as MentionEmbed).value,
+          // style: defaultStyles.link,
+        );
+      } else {
+        return TextSpan(
+          text: '',
+        );
+      }
+    }
+
     final textNode = node as leaf.Text;
     final nodeStyle = textNode.style;
     final isLink = nodeStyle.containsKey(Attribute.link.key) &&

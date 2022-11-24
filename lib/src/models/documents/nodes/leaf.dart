@@ -258,10 +258,12 @@ class Embed extends Leaf {
   @override
   Embeddable get value => super.value as Embeddable;
 
+
+  // 修改，toPlainText返回值，兼容@、#
   // Embed nodes are represented as unicode object replacement character in
   // plain text.
   @override
-  String toPlainText() => kObjectReplacementCharacter;
+  String toPlainText() => toContent();
 
   // 修改，添加@和#的embed类型不显示文本
   @override
@@ -273,4 +275,7 @@ class Embed extends Leaf {
   }
   @override
   String toString() => '${super.toString()} ${value.type}';
+
+  @override
+  int get length => value.length;
 }

@@ -27,6 +27,9 @@ class Embeddable {
     return {type: data};
   }
 
+  // 修改，添加length属性
+  int get length => 1;
+
   // 修改
   // static Embeddable fromJson(Map<String, dynamic> json) {
   //   final m = Map<String, dynamic>.from(json);
@@ -264,6 +267,11 @@ class MentionEmbed extends Embeddable {
     };
   }
 
+  @override
+  int get length {
+    return value.length;
+  }
+  
   static MentionEmbed fromJson(Map<String, dynamic> data) {
     return MentionEmbed(
       denotationChar: data['denotationChar'],
