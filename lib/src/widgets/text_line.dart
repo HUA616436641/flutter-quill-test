@@ -11,11 +11,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/documents/attribute.dart';
 import '../models/documents/nodes/container.dart' as container_node;
+import '../models/documents/nodes/embeddable.dart';
 import '../models/documents/nodes/leaf.dart';
 import '../models/documents/nodes/leaf.dart' as leaf;
 import '../models/documents/nodes/line.dart';
 import '../models/documents/nodes/node.dart';
-import '../models/documents/nodes/embeddable.dart';
 import '../models/documents/style.dart';
 import '../utils/color.dart';
 import '../utils/font.dart';
@@ -278,19 +278,6 @@ class _TextLineState extends State<TextLine> {
 
   TextSpan _getTextSpanFromNode(
       DefaultStyles defaultStyles, Node node, Style lineStyle) {
-    if(node is Embed) {
-      if(node.value is MentionEmbed) {
-        return TextSpan(
-          text: (node.value as MentionEmbed).value,
-          // style: defaultStyles.link,
-        );
-      } else {
-        return TextSpan(
-          text: '',
-        );
-      }
-    }
-
     final textNode = node as leaf.Text;
     final nodeStyle = textNode.style;
     final isLink = nodeStyle.containsKey(Attribute.link.key) &&
@@ -315,6 +302,9 @@ class _TextLineState extends State<TextLine> {
       Attribute.italic.key: defaultStyles.italic,
       Attribute.small.key: defaultStyles.small,
       Attribute.link.key: defaultStyles.link,
+      // 修改，at 和 channel使用默认的超链接样式
+      Attribute.at.key: defaultStyles.link,
+      Attribute.channel.key: defaultStyles.link,
       Attribute.underline.key: defaultStyles.underline,
       Attribute.strikeThrough.key: defaultStyles.strikeThrough,
     }.forEach((k, s) {
