@@ -834,7 +834,7 @@ class RawEditorState extends EditorState
     }
 
     _showCaretOnScreenScheduled = true;
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) async {
       if (widget.scrollable || _scrollController.hasClients) {
         _showCaretOnScreenScheduled = false;
 
@@ -847,6 +847,7 @@ class RawEditorState extends EditorState
             renderEditor.localToGlobal(const Offset(0, 0), ancestor: viewport);
         final offsetInViewport = _scrollController.offset + editorOffset.dy;
 
+        await Future.delayed(Duration(milliseconds: 300));
         final offset = renderEditor.getOffsetToRevealCursor(
           _scrollController.position.viewportDimension,
           _scrollController.offset,
@@ -1219,23 +1220,23 @@ class _Editor extends MultiChildRenderObjectWidget {
   @override
   RenderEditor createRenderObject(BuildContext context) {
     return RenderEditor(
-        key: key as GlobalKey,
-        offset: offset,
-        document: document,
-        textDirection: textDirection,
-        hasFocus: hasFocus,
-        scrollable: scrollable,
-        selection: selection,
-        startHandleLayerLink: startHandleLayerLink,
-        endHandleLayerLink: endHandleLayerLink,
-        onSelectionChanged: onSelectionChanged,
-        onSelectionCompleted: onSelectionCompleted,
-        cursorController: cursorController,
-        padding: padding,
-        maxContentWidth: maxContentWidth,
-        scrollBottomInset: scrollBottomInset,
-        floatingCursorDisabled: floatingCursorDisabled,
-        isSelectionInViewport: isSelectionInViewport,
+      key: key as GlobalKey,
+      offset: offset,
+      document: document,
+      textDirection: textDirection,
+      hasFocus: hasFocus,
+      scrollable: scrollable,
+      selection: selection,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
+      onSelectionChanged: onSelectionChanged,
+      onSelectionCompleted: onSelectionCompleted,
+      cursorController: cursorController,
+      padding: padding,
+      maxContentWidth: maxContentWidth,
+      scrollBottomInset: scrollBottomInset,
+      floatingCursorDisabled: floatingCursorDisabled,
+      isSelectionInViewport: isSelectionInViewport,
     );
   }
 
