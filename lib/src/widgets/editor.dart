@@ -150,6 +150,7 @@ class QuillEditor extends StatefulWidget {
       required this.readOnly,
       required this.expands,
       this.isSelectionInViewport,
+      this.caretOffset = 0,
       this.showCursor,
       this.paintCursorAboveText,
       this.placeholder,
@@ -367,6 +368,8 @@ class QuillEditor extends StatefulWidget {
   final bool floatingCursorDisabled;
 
   final IsSelectionInViewport? isSelectionInViewport;
+  
+  final double caretOffset; 
 
   /// allows to create a custom textSelectionControls,
   /// if this is null a default textSelectionControls based on the app's theme
@@ -468,6 +471,7 @@ class QuillEditorState extends State<QuillEditor>
       customStyleBuilder: widget.customStyleBuilder,
       floatingCursorDisabled: widget.floatingCursorDisabled,
       isSelectionInViewport: widget.isSelectionInViewport,
+      caretOffset: widget.caretOffset,
     );
 
     final editor = I18n(

@@ -46,7 +46,8 @@ class RawEditor extends StatefulWidget {
       required this.cursorStyle,
       required this.selectionColor,
       required this.selectionCtrls,
-      this.isSelectionInViewport,
+      this.isSelectionInViewport, 
+        this.caretOffset = 0,
       Key? key,
       this.scrollable = true,
       this.padding = EdgeInsets.zero,
@@ -227,6 +228,7 @@ class RawEditor extends StatefulWidget {
   final CustomStyleBuilder? customStyleBuilder;
   final bool floatingCursorDisabled;
   final IsSelectionInViewport? isSelectionInViewport;
+  final double caretOffset;
 
   @override
   State<StatefulWidget> createState() => RawEditorState();
@@ -860,7 +862,7 @@ class RawEditorState extends EditorState
             return;
           }
           _scrollController.animateTo(
-            math.min(offset, _scrollController.position.maxScrollExtent),
+            math.min(offset + widget.caretOffset, _scrollController.position.maxScrollExtent),
             duration: const Duration(milliseconds: 100),
             curve: Curves.fastOutSlowIn,
           );
